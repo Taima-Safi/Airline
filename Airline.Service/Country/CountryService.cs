@@ -5,8 +5,8 @@ namespace Airline.Service.Country;
 
 public class CountryService : ICountryService
 {
-    private readonly IBaseRepo<CountryModel> countryBaseRepo;
     private readonly IBaseRepo<CityModel> cityBaseRepo;
+    private readonly IBaseRepo<CountryModel> countryBaseRepo;
 
     public CountryService(IBaseRepo<CityModel> cityBaseRepo, IBaseRepo<CountryModel> countryBaseRepo)
     {
@@ -16,4 +16,12 @@ public class CountryService : ICountryService
 
     public async Task AddCountryAsync(string title)
     => await countryBaseRepo.AddAsync(new CountryModel { Title = title });
+
+    public async Task AddCityAsync(string title, long countryId)
+    {
+        if (!await countryBaseRepo.CheckIfExist(c => c.Id == countryId && c.IsValid))
+            throw new ArgumentException("Country does not exist or is not valid.");
+
+        await cityBaseRepo.AddAsync(new CityModel { Title = title, CountryId = countryId });
+    }
 }

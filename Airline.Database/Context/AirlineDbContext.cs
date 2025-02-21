@@ -10,6 +10,7 @@ public class AirlineDbContext : DbContext
     {
     }
 
+    public DbSet<UserModel> User { get; set; }
     public DbSet<CityModel> City { get; set; }
     public DbSet<FlightModel> Flight { get; set; }
     public DbSet<CountryModel> Country { get; set; }
@@ -22,6 +23,19 @@ public class AirlineDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder) // for relations
     {
         base.OnModelCreating(builder);
+        // FlightModel -> AirportModel (Arrival)
+        builder.Entity<FlightModel>()
+            .HasOne(f => f.ArrivalAirport)
+            .WithMany(a => a.ArrivalFlights)
+            .HasForeignKey(f => f.ArrivalAirportId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // FlightModel -> AirportModel (Departure)
+        builder.Entity<FlightModel>()
+            .HasOne(f => f.DepartureAirport)
+            .WithMany(a => a.DepartureFlights)
+            .HasForeignKey(f => f.DepartureAirportId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
