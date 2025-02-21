@@ -19,7 +19,7 @@ public class CountryService : ICountryService
 
     public async Task AddCityAsync(string title, long countryId)
     {
-        if (!await countryBaseRepo.CheckIfExist(c => c.Id == countryId && c.IsValid))
+        if (!await countryBaseRepo.CheckIfExistAsync(c => c.Id == countryId && c.IsValid))
             throw new ArgumentException("Country does not exist or is not valid.");
 
         await cityBaseRepo.AddAsync(new CityModel { Title = title, CountryId = countryId });

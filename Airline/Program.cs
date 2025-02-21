@@ -2,6 +2,7 @@ using Airline.Database.Context;
 using Airline.Repository;
 using Airline.Service.Airport;
 using Airline.Service.Country;
+using Airline.Service.User;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 #endregion
 
 #region Service
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IAirportService, AirportService>();
 

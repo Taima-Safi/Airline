@@ -13,7 +13,7 @@ namespace Airline.Controllers
         {
             this.airportService = airportService;
         }
-
+        [HttpPost]
         public async Task<IActionResult> AddAirportAsync(string title, long cityId)
         {
             await airportService.AddAirportAsync(title, cityId);

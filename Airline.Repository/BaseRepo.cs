@@ -21,6 +21,13 @@ public class BaseRepo<T> : IBaseRepo<T> where T : class
         await context.SaveChangesAsync();
     }
 
-    public async Task<bool> CheckIfExist(Expression<Func<T, bool>> expression)
+    public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> expression)
+        => await Entity.Where(expression).ToListAsync();
+
+    public async Task<T> GetByAsync(Expression<Func<T, bool>> expression)
+        => await Entity.Where(expression).FirstOrDefaultAsync();
+
+
+    public async Task<bool> CheckIfExistAsync(Expression<Func<T, bool>> expression)
         => await Entity.Where(expression).AnyAsync();
 }
