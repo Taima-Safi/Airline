@@ -3,6 +3,7 @@ using Airline.Repository;
 using Airline.Service.Airport;
 using Airline.Service.Country;
 using Airline.Service.Flight;
+using Airline.Service.Seat;
 using Airline.Service.User;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IAirportService, AirportService>();
+builder.Services.AddScoped<IAirplaneService, AirplaneService>();
 
 #endregion
 

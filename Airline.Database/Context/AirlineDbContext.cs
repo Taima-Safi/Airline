@@ -12,9 +12,11 @@ public class AirlineDbContext : DbContext
 
     public DbSet<UserModel> User { get; set; }
     public DbSet<CityModel> City { get; set; }
+    public DbSet<SeatModel> Seat { get; set; }
     public DbSet<FlightModel> Flight { get; set; }
     public DbSet<CountryModel> Country { get; set; }
     public DbSet<AirportModel> Airport { get; set; }
+    public DbSet<AirplaneModel> Airplane { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
