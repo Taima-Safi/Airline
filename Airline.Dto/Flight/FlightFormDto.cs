@@ -1,6 +1,6 @@
-﻿namespace Airline.Database.Model;
+﻿namespace Airline.Dto.Flight;
 
-public class FlightModel : BaseModel
+public class FlightFormDto
 {
     public string Code { get; set; }
 
@@ -8,8 +8,5 @@ public class FlightModel : BaseModel
     public DateTime DepartureDate { get; set; }
 
     public long ArrivalAirportId { get; set; }
-    public AirportModel ArrivalAirport { get; set; }
-
     public long DepartureAirportId { get; set; }
-    public AirportModel DepartureAirport { get; set; }
 }

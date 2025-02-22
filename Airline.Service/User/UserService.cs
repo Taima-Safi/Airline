@@ -22,8 +22,8 @@ public class UserService : IUserService
             PassportNumber = dto.PassportNumber,
         });
 
-    public async Task<List<UserDto>> GetAllUsersAsync()
-    {
+    //public async Task<List<UserDto>> GetAllUsersAsync()
+    //{
 
-    }
+    //}
 }
