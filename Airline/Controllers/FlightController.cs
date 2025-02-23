@@ -1,5 +1,6 @@
 ﻿using Airline.Dto.Flight;
 using Airline.Service.Flight;
+using Airline.Shared.Enum;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Airline.Controllers;
@@ -18,6 +19,12 @@ public class FlightController : ControllerBase
     public async Task<IActionResult> AddFlight(FlightFormDto dto)
     {
         await flightService.AddFlightAsync(dto);
+        return Ok();
+    }
+    [HttpPost]
+    public async Task<IActionResult> UpdateFlightClassPrice(long flightId, SeatClass type, double price)
+    {
+        await flightService.UpdateFlightClassPriceAsync(flightId, type, price);
         return Ok();
     }
     [HttpGet]

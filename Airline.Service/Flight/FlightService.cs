@@ -3,6 +3,8 @@ using Airline.Dto.Airport;
 using Airline.Dto.Flight;
 using Airline.Dto.Seat;
 using Airline.Repository;
+using Airline.Shared.Enum;
+using Airline.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -13,26 +15,29 @@ public class FlightService : IFlightService
     private readonly IBaseRepo<FlightModel> flightBaseRepo;
     private readonly IBaseRepo<AirportModel> airportBaseRepo;
     private readonly IBaseRepo<AirplaneModel> airplaneBaseRepo;
+    private readonly IBaseRepo<FlightClassPriceModel> flightClassPriceBaseRepo;
 
 
-    public FlightService(IBaseRepo<FlightModel> flightBaseRepo, IBaseRepo<AirportModel> airportBaseRepo, IBaseRepo<AirplaneModel> airplaneBaseRepo)
+    public FlightService(IBaseRepo<FlightModel> flightBaseRepo, IBaseRepo<AirportModel> airportBaseRepo,
+        IBaseRepo<AirplaneModel> airplaneBaseRepo, IBaseRepo<FlightClassPriceModel> flightClassPriceBaseRepo)
     {
         this.flightBaseRepo = flightBaseRepo;
         this.airportBaseRepo = airportBaseRepo;
         this.airplaneBaseRepo = airplaneBaseRepo;
+        this.flightClassPriceBaseRepo = flightClassPriceBaseRepo;
     }
 
     public async Task AddFlightAsync(FlightFormDto dto)
     {
 
         if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == dto.AirplaneId && a.IsValid))
-            throw new ArgumentException("Airplane not found.");
+            throw new NotFoundException("Airplane not found.");
 
         if (!await airportBaseRepo.CheckIfExistAsync(a => a.Id == dto.ArrivalAirportId && a.IsValid))
-            throw new ArgumentException("Arrival Airport not found.");
+            throw new NotFoundException("Arrival Airport not found.");
 
         if (!await airportBaseRepo.CheckIfExistAsync(a => a.Id == dto.DepartureAirportId && a.IsValid))
-            throw new ArgumentException("Departure Airport not found.");
+            throw new NotFoundException("Departure Airport not found.");
 
         await flightBaseRepo.AddAsync(new FlightModel
         {
@@ -44,7 +49,28 @@ public class FlightService : IFlightService
             DepartureAirportId = dto.DepartureAirportId,
         });
     }
-    public async Task<List<FlightDto>> GetAllFlightsAsync(string code, string airplaneTitle, string arrivalCityTitle, string departureCityTitle, DateTime? departureDate, DateTime? arrivalDate)
+    public async Task UpdateFlightClassPriceAsync(long flightId, SeatClass type, double price)
+    {
+
+        if (!await flightBaseRepo.CheckIfExistAsync(f => f.Id == flightId && f.IsValid))
+            throw new NotFoundException("Flight not found.");
+
+        var classPrice = await flightClassPriceBaseRepo.GetByAsync(x => x.FlightId == flightId && x.Type == type && x.IsActive && x.IsValid);
+
+        if (classPrice != null)
+            await flightClassPriceBaseRepo.UpdateAsync(f => f.Id == classPrice.Id, setter => setter.SetProperty(x => x.IsActive, false));
+
+        await flightClassPriceBaseRepo.AddAsync(new FlightClassPriceModel
+        {
+            Type = type,
+            Price = price,
+            IsActive = true,
+            FlightId = flightId
+        });
+
+    }
+    public async Task<List<FlightDto>> GetAllFlightsAsync(string code, string airplaneTitle, string arrivalCityTitle,
+        string departureCityTitle, DateTime? departureDate, DateTime? arrivalDate)
     {
         Expression<Func<FlightModel, bool>> expression = f => (string.IsNullOrEmpty(code) || f.Code.Contains(code))
         && (string.IsNullOrEmpty(departureCityTitle) || f.DepartureAirport.City.Title.Contains(departureCityTitle))
@@ -88,7 +114,7 @@ public class FlightService : IFlightService
     {
         Expression<Func<FlightModel, bool>> expression = f => f.Id == id && f.IsValid;
         if (!await flightBaseRepo.CheckIfExistAsync(expression))
-            throw new ArgumentException("Flight not found");
+            throw new NotFoundException("Flight not found");
 
         var flight = await flightBaseRepo.GetByAsync(expression, x => x.Include(x => x.ArrivalAirport).ThenInclude(c => c.City)
         , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City), x => x.Include(x => x.Airplane).ThenInclude(c => c.Seats));
@@ -129,16 +155,16 @@ public class FlightService : IFlightService
     public async Task UpdateFlightAsync(long flightId, FlightFormDto dto)
     {
         var model = await flightBaseRepo.GetByAsync(x => x.Id == flightId && x.IsValid) ??
-            throw new ArgumentException("Flight not found.");
+            throw new NotFoundException("Flight not found.");
 
         if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == dto.AirplaneId && a.IsValid))
-            throw new ArgumentException("Airplane not found.");
+            throw new NotFoundException("Airplane not found.");
 
         if (!await airportBaseRepo.CheckIfExistAsync(a => a.Id == dto.ArrivalAirportId && a.IsValid))
-            throw new ArgumentException("Arrival Airport not found.");
+            throw new NotFoundException("Arrival Airport not found.");
 
         if (!await airportBaseRepo.CheckIfExistAsync(a => a.Id == dto.DepartureAirportId && a.IsValid))
-            throw new ArgumentException("Departure Airport not found.");
+            throw new NotFoundException("Departure Airport not found.");
 
         model.Code = dto.Code;
         model.AirplaneId = dto.AirplaneId;
@@ -163,7 +189,7 @@ public class FlightService : IFlightService
         Expression<Func<FlightModel, bool>> expression = x => x.Id == flightId && x.IsValid;
 
         if (!await flightBaseRepo.CheckIfExistAsync(expression))
-            throw new ArgumentException("Flight not found.");
+            throw new NotFoundException("Flight not found.");
 
         await flightBaseRepo.RemoveAsync(expression,
             setters => setters.SetProperty(x => x.IsValid, false));

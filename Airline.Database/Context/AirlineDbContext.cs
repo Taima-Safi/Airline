@@ -17,6 +17,7 @@ public class AirlineDbContext : DbContext
     public DbSet<CountryModel> Country { get; set; }
     public DbSet<AirportModel> Airport { get; set; }
     public DbSet<AirplaneModel> Airplane { get; set; }
+    public DbSet<FlightClassPriceModel> FlightClassPrice { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -38,6 +39,10 @@ public class AirlineDbContext : DbContext
             .WithMany(a => a.DepartureFlights)
             .HasForeignKey(f => f.DepartureAirportId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<BookModel>()
+            .HasIndex(b => new { b.FlightId, b.SeatId })
+            .IsUnique();
     }
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

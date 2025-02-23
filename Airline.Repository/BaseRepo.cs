@@ -58,6 +58,6 @@ public class BaseRepo<T> : IBaseRepo<T> where T : class
     }
 
     public async Task<bool> CheckIfExistAsync(Expression<Func<T, bool>> expression)
-        => await Entity.Where(expression).AnyAsync();
+        => await Entity.AnyAsync(expression);
     public async Task SaveChangesAsync() => await context.SaveChangesAsync();
 }

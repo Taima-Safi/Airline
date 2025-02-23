@@ -1,6 +1,8 @@
 using Airline.Database.Context;
 using Airline.Repository;
+using Airline.Repository.Flight;
 using Airline.Service.Airport;
+using Airline.Service.Book;
 using Airline.Service.Country;
 using Airline.Service.Flight;
 using Airline.Service.Seat;
@@ -18,6 +20,7 @@ builder.Services.AddSwaggerGen();
 
 #region Repository
 builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
+builder.Services.AddScoped<IFlightRepo, FlightRepo>();
 #endregion
 
 #region Service
@@ -26,6 +29,7 @@ builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IAirportService, AirportService>();
 builder.Services.AddScoped<IAirplaneService, AirplaneService>();
+builder.Services.AddScoped<IBookService, BookService>();
 
 #endregion
 

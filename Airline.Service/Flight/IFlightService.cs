@@ -1,4 +1,5 @@
 ﻿using Airline.Dto.Flight;
+using Airline.Shared.Enum;
 
 namespace Airline.Service.Flight;
 
@@ -9,4 +10,5 @@ public interface IFlightService
     Task<FlightDto> GetFlightByIdAsync(long id);
     Task RemoveFlightAsync(long flightId);
     Task UpdateFlightAsync(long flightId, FlightFormDto dto);
+    Task UpdateFlightClassPriceAsync(long flightId, SeatClass type, double price);
 }
