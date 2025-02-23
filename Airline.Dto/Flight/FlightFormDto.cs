@@ -3,6 +3,7 @@
 public class FlightFormDto
 {
     public string Code { get; set; }
+    public long AirplaneId { get; set; }
 
     public DateTime ArrivalDate { get; set; }
     public DateTime DepartureDate { get; set; }

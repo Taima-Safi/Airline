@@ -2,5 +2,6 @@
 public class AirplaneModel : BaseModel
 {
     public string Title { get; set; }
-    public ICollection<SeatModel> Seats { get; set; }
+    public ICollection<SeatModel> Seats { get; set; } =
+    [];
 }

@@ -1,6 +1,7 @@
 ﻿using Airline.Database.Model;
 using Airline.Dto.Airport;
 using Airline.Dto.Flight;
+using Airline.Dto.Seat;
 using Airline.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -11,16 +12,21 @@ public class FlightService : IFlightService
 {
     private readonly IBaseRepo<FlightModel> flightBaseRepo;
     private readonly IBaseRepo<AirportModel> airportBaseRepo;
+    private readonly IBaseRepo<AirplaneModel> airplaneBaseRepo;
 
 
-    public FlightService(IBaseRepo<FlightModel> flightBaseRepo, IBaseRepo<AirportModel> airportBaseRepo)
+    public FlightService(IBaseRepo<FlightModel> flightBaseRepo, IBaseRepo<AirportModel> airportBaseRepo, IBaseRepo<AirplaneModel> airplaneBaseRepo)
     {
         this.flightBaseRepo = flightBaseRepo;
         this.airportBaseRepo = airportBaseRepo;
+        this.airplaneBaseRepo = airplaneBaseRepo;
     }
 
     public async Task AddFlightAsync(FlightFormDto dto)
     {
+
+        if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == dto.AirplaneId && a.IsValid))
+            throw new ArgumentException("Airplane not found.");
 
         if (!await airportBaseRepo.CheckIfExistAsync(a => a.Id == dto.ArrivalAirportId && a.IsValid))
             throw new ArgumentException("Arrival Airport not found.");
@@ -31,23 +37,25 @@ public class FlightService : IFlightService
         await flightBaseRepo.AddAsync(new FlightModel
         {
             Code = dto.Code,
+            AirplaneId = dto.AirplaneId,
             ArrivalDate = dto.ArrivalDate,
             DepartureDate = dto.DepartureDate,
             ArrivalAirportId = dto.ArrivalAirportId,
             DepartureAirportId = dto.DepartureAirportId,
         });
     }
-    public async Task<List<FlightDto>> GetAllFlightsAsync(string code, string arrivalCityTitle, string departureCityTitle, DateTime? departureDate, DateTime? arrivalDate)
+    public async Task<List<FlightDto>> GetAllFlightsAsync(string code, string airplaneTitle, string arrivalCityTitle, string departureCityTitle, DateTime? departureDate, DateTime? arrivalDate)
     {
         Expression<Func<FlightModel, bool>> expression = f => (string.IsNullOrEmpty(code) || f.Code.Contains(code))
         && (string.IsNullOrEmpty(departureCityTitle) || f.DepartureAirport.City.Title.Contains(departureCityTitle))
         && (string.IsNullOrEmpty(arrivalCityTitle) || f.ArrivalAirport.City.Title.Contains(arrivalCityTitle))
+        && (string.IsNullOrEmpty(airplaneTitle) || f.Airplane.Title.Contains(airplaneTitle))
         && (!departureDate.HasValue || f.DepartureDate == departureDate)
         && (!arrivalDate.HasValue || f.ArrivalDate == arrivalDate)
         && f.IsValid;
 
         var flights = await flightBaseRepo.GetAllAsync(expression, x => x.Include(x => x.ArrivalAirport).ThenInclude(c => c.City)
-        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City));
+        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City), x => x.Include(x => x.Airplane));
 
         return flights.Select(f => new FlightDto
         {
@@ -55,6 +63,11 @@ public class FlightService : IFlightService
             Code = f.Code,
             ArrivalDate = f.ArrivalDate,
             DepartureDate = f.DepartureDate,
+            Airplane = new AirplaneDto
+            {
+                Id = f.Airplane.Id,
+                Title = f.Airplane.Title,
+            },
             ArrivalAirport = new AirportDto
             {
                 Id = f.ArrivalAirport.Id,
@@ -78,7 +91,7 @@ public class FlightService : IFlightService
             throw new ArgumentException("Flight not found");
 
         var flight = await flightBaseRepo.GetByAsync(expression, x => x.Include(x => x.ArrivalAirport).ThenInclude(c => c.City)
-        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City));
+        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City), x => x.Include(x => x.Airplane).ThenInclude(c => c.Seats));
 
         return new FlightDto
         {
@@ -86,6 +99,17 @@ public class FlightService : IFlightService
             Code = flight.Code,
             ArrivalDate = flight.ArrivalDate,
             DepartureDate = flight.DepartureDate,
+            Airplane = new AirplaneDto
+            {
+                Id = flight.Airplane.Id,
+                Title = flight.Airplane.Title,
+                Seats = flight.Airplane.Seats.Select(s => new SeatDto
+                {
+                    Id = s.Id,
+                    Code = s.Code,
+                    Type = s.Type
+                }).ToList()
+            },
             ArrivalAirport = new AirportDto
             {
                 Id = flight.ArrivalAirport.Id,
@@ -107,6 +131,9 @@ public class FlightService : IFlightService
         var model = await flightBaseRepo.GetByAsync(x => x.Id == flightId && x.IsValid) ??
             throw new ArgumentException("Flight not found.");
 
+        if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == dto.AirplaneId && a.IsValid))
+            throw new ArgumentException("Airplane not found.");
+
         if (!await airportBaseRepo.CheckIfExistAsync(a => a.Id == dto.ArrivalAirportId && a.IsValid))
             throw new ArgumentException("Arrival Airport not found.");
 
@@ -114,6 +141,7 @@ public class FlightService : IFlightService
             throw new ArgumentException("Departure Airport not found.");
 
         model.Code = dto.Code;
+        model.AirplaneId = dto.AirplaneId;
         model.ArrivalDate = dto.ArrivalDate;
         model.DepartureDate = dto.DepartureDate;
         model.ArrivalAirportId = dto.ArrivalAirportId;

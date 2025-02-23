@@ -7,6 +7,8 @@ public class FlightModel : BaseModel
     public DateTime ArrivalDate { get; set; }
     public DateTime DepartureDate { get; set; }
 
+    public long AirplaneId { get; set; }
+    public AirplaneModel Airplane { get; set; }
     public long ArrivalAirportId { get; set; }
     public AirportModel ArrivalAirport { get; set; }
 

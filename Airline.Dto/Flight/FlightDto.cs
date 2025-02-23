@@ -10,6 +10,7 @@ public class FlightDto
     public DateTime ArrivalDate { get; set; }
     public DateTime DepartureDate { get; set; }
 
+    public AirplaneDto Airplane { get; set; }
     public AirportDto ArrivalAirport { get; set; }
     public AirportDto DepartureAirport { get; set; }
 }

@@ -21,9 +21,9 @@ public class FlightController : ControllerBase
         return Ok();
     }
     [HttpGet]
-    public async Task<IActionResult> GetFlights(string code, string arrivalCityTitle, string departureCityTitle, DateTime? departureDate, DateTime? arrivalDate)
+    public async Task<IActionResult> GetFlights(string code, string airplaneTitle, string arrivalCityTitle, string departureCityTitle, DateTime? departureDate, DateTime? arrivalDate)
     {
-        var flights = await flightService.GetAllFlightsAsync(code, arrivalCityTitle, departureCityTitle, departureDate, arrivalDate);
+        var flights = await flightService.GetAllFlightsAsync(code, airplaneTitle, arrivalCityTitle, departureCityTitle, departureDate, arrivalDate);
         return Ok(flights);
     }
     [HttpGet]
