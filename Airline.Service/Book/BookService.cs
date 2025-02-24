@@ -4,6 +4,9 @@ using Airline.Repository;
 using Airline.Repository.Flight;
 using Airline.Shared.Enum;
 using Airline.Shared.Exception;
+using Microsoft.Extensions.Configuration;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using System.Security.Cryptography;
 
 namespace Airline.Service.Book;
@@ -11,13 +14,14 @@ namespace Airline.Service.Book;
 public class BookService : IBookService
 {
     private readonly IFlightRepo flightRepo;
+    private readonly IConfiguration _configuration;
     private readonly IBaseRepo<BookModel> bookBaseRepo;
     private readonly IBaseRepo<UserModel> userBaseRepo;
     private readonly IBaseRepo<SeatModel> seatBaseRepo;
     private readonly IBaseRepo<FlightModel> flightBaseRepo;
     private readonly IBaseRepo<FlightClassPriceModel> flightClassPriceBaseRepo;
     public BookService(IBaseRepo<FlightModel> flightBaseRepo, IBaseRepo<FlightClassPriceModel> flightClassPriceBaseRepo,
-        IBaseRepo<BookModel> bookBaseRepo, IBaseRepo<UserModel> userBaseRepo, IBaseRepo<SeatModel> seatBaseRepo, IFlightRepo flightRepo)
+        IBaseRepo<BookModel> bookBaseRepo, IBaseRepo<UserModel> userBaseRepo, IBaseRepo<SeatModel> seatBaseRepo, IFlightRepo flightRepo, IConfiguration configuration)
     {
         this.flightBaseRepo = flightBaseRepo;
         this.flightClassPriceBaseRepo = flightClassPriceBaseRepo;
@@ -25,6 +29,7 @@ public class BookService : IBookService
         this.userBaseRepo = userBaseRepo;
         this.seatBaseRepo = seatBaseRepo;
         this.flightRepo = flightRepo;
+        _configuration = configuration;
     }
 
     public async Task<string> AddBookAsync(BookFormDto dto)
@@ -38,7 +43,7 @@ public class BookService : IBookService
 
         if (await bookBaseRepo.CheckIfExistAsync(a => a.FlightId == dto.FlightId && a.SeatId == dto.SeatId && a.IsValid))
             throw new ArgumentException("Sorry.. Seat Booked.");
-
+        //Start transaction
         var seatType = await flightRepo.GetSeatTypeAsync(dto.SeatId);
         var price = await flightRepo.GetSeatPriceAsync(seatType, dto.FlightId);
 
@@ -53,19 +58,30 @@ public class BookService : IBookService
             UserBookCode = userBookCode,
             BookStatus = BookStatus.Pending // when payment complete then BookStatus = Confirmed
         });
+        var email = await flightRepo.GetUserEmailAsync(userBookCode);
+        await SendBookingConfirmation(email, "Pending");
+        //End transaction
         return userBookCode;
     }
+
     public async Task UpdateBookStatusAsync(string userBookCode, bool isConfirmed)
     {
         if (!await bookBaseRepo.CheckIfExistAsync(b => b.UserBookCode == userBookCode && b.IsValid))
             throw new NotFoundException("user book not found");
+        var email = await flightRepo.GetUserEmailAsync(userBookCode);
 
         //Check if payment has been made successfully then => 
         if (isConfirmed)
+        {
             await bookBaseRepo.UpdateAsync(b => b.UserBookCode == userBookCode && b.IsValid, setter => setter.SetProperty(x => x.BookStatus, BookStatus.Confirmed));
+            await SendBookingConfirmation(email, "Confirmed");
+        }
         else
+        {
             // if should return money should update payment model
             await bookBaseRepo.UpdateAsync(b => b.UserBookCode == userBookCode && b.IsValid, setter => setter.SetProperty(x => x.BookStatus, BookStatus.Canceled));
+            await SendBookingConfirmation(email, "Canceled");
+        }
     }
     public async Task RemoveBookAsync(long bookId)
     {
@@ -87,5 +103,22 @@ public class BookService : IBookService
         // Convert the random bytes to a string using the character pool
         return new string(randomNumber.Select(b => chars[b % chars.Length]).ToArray());
 
+    }
+    private async Task SendBookingConfirmation(string toEmail, string status)
+    {
+        var apiKey = _configuration["SendGrid:ApiKey"];
+        var client = new SendGridClient(apiKey);
+
+        var from = new EmailAddress(_configuration["SendGrid:FromEmail"], _configuration["SendGrid:FromName"]);
+        var to = new EmailAddress(toEmail);
+        var subject = "Booking Confirmed";
+
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, $"Your book is {status} successfully", $"{toEmail}");
+        var response = await client.SendEmailAsync(msg);
+
+        if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
+        {
+            throw new ArgumentException();
+        }
     }
 }

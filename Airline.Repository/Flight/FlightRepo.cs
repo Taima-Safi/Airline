@@ -16,4 +16,6 @@ public class FlightRepo : IFlightRepo
         => await context.FlightClassPrice.Where(s => s.FlightId == flightId && s.Type == type && s.IsActive && s.IsValid).Select(s => s.Price).FirstOrDefaultAsync();
     public async Task<SeatClass> GetSeatTypeAsync(long seatId)
         => await context.Seat.Where(s => s.Id == seatId && s.IsValid).Select(s => s.Type).FirstOrDefaultAsync();
+    public async Task<string> GetUserEmailAsync(string userBookingCode)
+        => await context.Book.Where(s => s.UserBookCode == userBookingCode && s.IsValid).Include(u => u.User).Select(s => s.User.Email).FirstOrDefaultAsync();
 }
