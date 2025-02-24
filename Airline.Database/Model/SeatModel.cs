@@ -9,4 +9,5 @@ public class SeatModel : BaseModel
 
     public long AirplaneId { get; set; }
     public AirplaneModel Airplane { get; set; }
+    public ICollection<BookModel> Books { get; set; }
 }

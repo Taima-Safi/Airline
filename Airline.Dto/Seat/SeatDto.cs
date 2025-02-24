@@ -1,4 +1,5 @@
-﻿using Airline.Shared.Enum;
+﻿using Airline.Dto.Book;
+using Airline.Shared.Enum;
 
 namespace Airline.Dto.Seat;
 
@@ -10,4 +11,5 @@ public class SeatDto
 
     public long AirplaneId { get; set; }
     public string AirplaneTitle { get; set; }
+    public List<BookDto> Books { get; set; } = [];
 }

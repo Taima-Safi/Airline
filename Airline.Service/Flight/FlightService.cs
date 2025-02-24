@@ -1,7 +1,9 @@
 ﻿using Airline.Database.Model;
 using Airline.Dto.Airport;
+using Airline.Dto.Book;
 using Airline.Dto.Flight;
 using Airline.Dto.Seat;
+using Airline.Dto.User;
 using Airline.Repository;
 using Airline.Shared.Enum;
 using Airline.Shared.Exception;
@@ -133,7 +135,17 @@ public class FlightService : IFlightService
                 {
                     Id = s.Id,
                     Code = s.Code,
-                    Type = s.Type
+                    Type = s.Type,
+                    Books = s.Books.Where(b => b.IsValid).Select(b => new BookDto
+                    {
+                        Date = b.Date,
+                        User = new UserDto
+                        {
+                            Id = b.User.Id,
+                            Email = b.User.Email
+                        },
+                        BookStatus = b.BookStatus,
+                    }).ToList(),
                 }).ToList()
             },
             ArrivalAirport = new AirportDto
