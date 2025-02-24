@@ -18,7 +18,7 @@ public class UserService : IUserService
             Email = dto.Email,
             LastName = dto.LastName,
             FirstName = dto.FirstName,
-            PhonNumber = dto.PhonNumber,
+            PhoneNumber = dto.PhonNumber,
             PassportNumber = dto.PassportNumber,
         });
 

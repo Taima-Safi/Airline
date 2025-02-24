@@ -13,6 +13,7 @@ public class AirlineDbContext : DbContext
     public DbSet<UserModel> User { get; set; }
     public DbSet<CityModel> City { get; set; }
     public DbSet<SeatModel> Seat { get; set; }
+    public DbSet<BookModel> Book { get; set; }
     public DbSet<FlightModel> Flight { get; set; }
     public DbSet<CountryModel> Country { get; set; }
     public DbSet<AirportModel> Airport { get; set; }
@@ -39,6 +40,12 @@ public class AirlineDbContext : DbContext
             .WithMany(a => a.DepartureFlights)
             .HasForeignKey(f => f.DepartureAirportId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<BookModel>()
+            .HasOne(b => b.Seat)
+            .WithMany()
+            .HasForeignKey(b => b.SeatId)
+            .OnDelete(DeleteBehavior.Restrict); // Disable cascade delete
 
         builder.Entity<BookModel>()
             .HasIndex(b => new { b.FlightId, b.SeatId })

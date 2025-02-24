@@ -4,5 +4,7 @@ namespace Airline.Service.Book;
 
 public interface IBookService
 {
-    Task AddBookAsync(BookFormDto dto);
+    Task<string> AddBookAsync(BookFormDto dto);
+    Task RemoveBookAsync(long bookId);
+    Task UpdateBookStatusAsync(string userBookCode, bool isConfirmed);
 }

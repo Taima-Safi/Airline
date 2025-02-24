@@ -1,10 +1,13 @@
-﻿namespace Airline.Database.Model;
+﻿using Airline.Shared.Enum;
+
+namespace Airline.Database.Model;
 
 public class BookModel : BaseModel
 {
     public double Price { get; set; }
     public DateTime Date { get; set; }
-    //public bool IsBooked { get; set; }
+    public string UserBookCode { get; set; }
+    public BookStatus BookStatus { get; set; }
 
     public long SeatId { get; set; }
     public SeatModel Seat { get; set; }

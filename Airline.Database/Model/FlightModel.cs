@@ -16,5 +16,6 @@ public class FlightModel : BaseModel
     public long DepartureAirportId { get; set; }
     public AirportModel DepartureAirport { get; set; }
 
+    public ICollection<BookModel> Books { get; set; }
     public ICollection<FlightClassPriceModel> FlightClassPrices { get; set; }
 }
