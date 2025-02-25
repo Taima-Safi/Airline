@@ -41,6 +41,21 @@ public class AirplaneService : IAirplaneService
             AirplaneId = dto.AirplaneId
         });
     }
+    public async Task AddSeatsAsync(List<string> seatCodes, SeatClass type, long airplaneId)
+    {
+
+        if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == airplaneId && a.IsValid))
+            throw new ArgumentException("Airplane not found.");
+
+        var models = seatCodes.Select(sc => new SeatModel
+        {
+            Code = sc,
+            Type = type,
+            AirplaneId = airplaneId
+        }).ToList();
+
+        await seatBaseRepo.AddListAsync(models);
+    }
     public async Task<List<SeatDto>> GetAllAirplaneSeatsAsync(long airplaneId, string seatCode, string airplaneTitle, SeatClass? type)
     {
         Expression<Func<SeatModel, bool>> expression = s => s.AirplaneId == airplaneId
