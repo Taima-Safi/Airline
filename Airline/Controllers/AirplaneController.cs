@@ -37,6 +37,12 @@ namespace Airline.Controllers
             await airplaneService.AddSeatAsync(dto);
             return Ok();
         }
+        [HttpPost]
+        public async Task<IActionResult> AddSeats(List<string> seatCode, SeatClass type, long airplaneId)
+        {
+            await airplaneService.AddSeatsAsync(seatCode, type, airplaneId);
+            return Ok();
+        }
         [HttpGet]
         public async Task<IActionResult> GetAllAirplaneSeats(long airplaneId, string seatCode, string airplaneTitle, SeatClass? type)
         {

@@ -8,6 +8,7 @@ public interface IAirplaneService
 {
     Task AddAirplaneAsync(string title);
     Task AddSeatAsync(SeatFormDto dto);
+    Task AddSeatsAsync(List<string> seatCodes, SeatClass type, long airplaneId);
     Task<List<SeatDto>> GetAllAirplaneSeatsAsync(long airplaneId, string seatCode, string airplaneTitle, SeatClass? type);
     Task<SeatDto> GetSeatAsync(long seatId);
     Task RemoveAirplaneAsync(long id);

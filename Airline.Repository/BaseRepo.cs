@@ -21,6 +21,11 @@ public class BaseRepo<T> : IBaseRepo<T> where T : class
         await Entity.AddAsync(item);
         await context.SaveChangesAsync();
     }
+    public async Task AddListAsync(List<T> items)
+    {
+        await Entity.AddRangeAsync(items);
+        await context.SaveChangesAsync();
+    }
 
     public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> expression, params Func<IQueryable<T>, IQueryable<T>>[] includes)
     {
