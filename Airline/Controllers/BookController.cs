@@ -39,7 +39,7 @@ public class BookController : ControllerBase
         return Ok();
     }
     [HttpPost]
-    public async Task<IActionResult> RemoveBook(long bookId)
+    public async Task<IActionResult> HardRemoveBook(long bookId)
     {
         await bookService.RemoveBookAsync(bookId);
         return Ok();

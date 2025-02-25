@@ -83,7 +83,7 @@ public class FlightService : IFlightService
         && f.IsValid;
 
         var flights = await flightBaseRepo.GetAllAsync(expression, x => x.Include(x => x.ArrivalAirport).ThenInclude(c => c.City)
-        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City), x => x.Include(x => x.Airplane));
+        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City), x => x.Include(x => x.Airplane), x => x.Include(x => x.FlightClassPrices));
 
         return flights.Select(f => new FlightDto
         {
@@ -91,6 +91,13 @@ public class FlightService : IFlightService
             Code = f.Code,
             ArrivalDate = f.ArrivalDate,
             DepartureDate = f.DepartureDate,
+            FlightClassPrice = f.FlightClassPrices.Where(p => p.IsActive)
+            .Select(p => new FlightClassPriceDto
+            {
+                Type = p.Type,
+                Price = p.Price,
+                IsActive = p.IsActive,
+            }).ToList(),
             Airplane = new AirplaneDto
             {
                 Id = f.Airplane.Id,
@@ -112,14 +119,15 @@ public class FlightService : IFlightService
             }
         }).ToList();
     }
-    public async Task<FlightDto> GetFlightByIdAsync(long id)
+    public async Task<FlightDto> GetFlightByIdAsync(long id, bool justActivePrice)
     {
         Expression<Func<FlightModel, bool>> expression = f => f.Id == id && f.IsValid;
         if (!await flightBaseRepo.CheckIfExistAsync(expression))
             throw new NotFoundException("Flight not found");
 
         var flight = await flightBaseRepo.GetByAsync(expression, x => x.Include(x => x.ArrivalAirport).ThenInclude(c => c.City)
-        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City), x => x.Include(x => x.Airplane).ThenInclude(c => c.Seats));
+        , x => x.Include(x => x.DepartureAirport).ThenInclude(c => c.City), x => x.Include(x => x.Airplane).ThenInclude(c => c.Seats).ThenInclude(x => x.Books)
+        , x => x.Include(x => x.FlightClassPrices));
 
         return new FlightDto
         {
@@ -148,6 +156,13 @@ public class FlightService : IFlightService
                     }).ToList(),
                 }).ToList()
             },
+            FlightClassPrice = flight.FlightClassPrices.Where(p => justActivePrice ? p.IsActive : !p.IsActive)
+            .Select(p => new FlightClassPriceDto
+            {
+                Type = p.Type,
+                Price = p.Price,
+                IsActive = p.IsActive,
+            }).ToList(),
             ArrivalAirport = new AirportDto
             {
                 Id = flight.ArrivalAirport.Id,

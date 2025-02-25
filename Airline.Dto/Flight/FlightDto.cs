@@ -13,4 +13,5 @@ public class FlightDto
     public AirplaneDto Airplane { get; set; }
     public AirportDto ArrivalAirport { get; set; }
     public AirportDto DepartureAirport { get; set; }
+    public List<FlightClassPriceDto> FlightClassPrice { get; set; }
 }

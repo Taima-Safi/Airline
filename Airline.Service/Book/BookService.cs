@@ -129,7 +129,7 @@ public class BookService : IBookService
         if (!await bookBaseRepo.CheckIfExistAsync(b => b.Id == bookId && b.IsValid))
             throw new NotFoundException("user book not found");
 
-        await bookBaseRepo.UpdateAsync(b => b.Id == bookId && b.IsValid, setter => setter.SetProperty(x => x.IsValid, false));
+        await bookBaseRepo.HardRemoveAsync(b => b.Id == bookId && b.IsValid);
     }
 
     private static string GenerateRandomString()

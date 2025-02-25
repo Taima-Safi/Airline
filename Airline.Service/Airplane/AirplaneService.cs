@@ -2,6 +2,7 @@
 using Airline.Dto.Seat;
 using Airline.Repository;
 using Airline.Shared.Enum;
+using Airline.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -32,7 +33,7 @@ public class AirplaneService : IAirplaneService
     {
 
         if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == dto.AirplaneId && a.IsValid))
-            throw new ArgumentException("Airplane not found.");
+            throw new NotFoundException("Airplane not found.");
 
         await seatBaseRepo.AddAsync(new SeatModel
         {
@@ -45,7 +46,7 @@ public class AirplaneService : IAirplaneService
     {
 
         if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == airplaneId && a.IsValid))
-            throw new ArgumentException("Airplane not found.");
+            throw new NotFoundException("Airplane not found.");
 
         var models = seatCodes.Select(sc => new SeatModel
         {
@@ -80,7 +81,7 @@ public class AirplaneService : IAirplaneService
         Expression<Func<SeatModel, bool>> expression = s => s.Id == seatId && s.IsValid;
 
         if (!await seatBaseRepo.CheckIfExistAsync(expression))
-            throw new ArgumentException("Airplane seat not found.");
+            throw new NotFoundException("Airplane seat not found.");
 
         var seat = await seatBaseRepo.GetByAsync(expression, x => x.Include(x => x.Airplane));
 
@@ -96,10 +97,10 @@ public class AirplaneService : IAirplaneService
     public async Task UpdateSeatAsync(long seatId, SeatFormDto dto)
     {
         var model = await seatBaseRepo.GetByAsync(x => x.Id == seatId && x.IsValid) ??
-            throw new ArgumentException("seat not found.");
+            throw new NotFoundException("seat not found.");
 
         if (!await airplaneBaseRepo.CheckIfExistAsync(a => a.Id == dto.AirplaneId && a.IsValid))
-            throw new ArgumentException(" Airplane not found.");
+            throw new NotFoundException(" Airplane not found.");
 
         await seatBaseRepo.UpdateAsync(
         f => f.Id == seatId && f.IsValid,
@@ -113,7 +114,7 @@ public class AirplaneService : IAirplaneService
         Expression<Func<SeatModel, bool>> expression = s => s.Id == seatId && s.IsValid;
 
         if (!await seatBaseRepo.CheckIfExistAsync(expression))
-            throw new ArgumentException("Airplane seat not found.");
+            throw new NotFoundException("Airplane seat not found.");
 
         await seatBaseRepo.RemoveAsync(expression,
             setters => setters.SetProperty(x => x.IsValid, false));

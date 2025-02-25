@@ -34,9 +34,9 @@ public class FlightController : ControllerBase
         return Ok(flights);
     }
     [HttpGet]
-    public async Task<IActionResult> GetFlight(long id)
+    public async Task<IActionResult> GetFlight(long id, bool justActivePrice)
     {
-        var flight = await flightService.GetFlightByIdAsync(id);
+        var flight = await flightService.GetFlightByIdAsync(id, justActivePrice);
         return Ok(flight);
     }
     [HttpPost]

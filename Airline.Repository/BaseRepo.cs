@@ -61,6 +61,11 @@ public class BaseRepo<T> : IBaseRepo<T> where T : class
         await Entity.Where(predicate).ExecuteUpdateAsync(setProperties);
         await context.SaveChangesAsync();
     }
+    public async Task HardRemoveAsync(Expression<Func<T, bool>> predicate)
+    {
+        await Entity.Where(predicate).ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+    }
 
     public async Task<bool> CheckIfExistAsync(Expression<Func<T, bool>> expression)
         => await Entity.AnyAsync(expression);
