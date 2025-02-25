@@ -1,12 +1,17 @@
 ﻿using Airline.Database.Model;
 using Airline.Dto.Book;
+using Airline.Dto.Flight;
+using Airline.Dto.Seat;
+using Airline.Dto.User;
 using Airline.Repository;
 using Airline.Repository.Flight;
 using Airline.Shared.Enum;
 using Airline.Shared.Exception;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System.Linq.Expressions;
 using System.Security.Cryptography;
 
 namespace Airline.Service.Book;
@@ -59,11 +64,44 @@ public class BookService : IBookService
             BookStatus = BookStatus.Pending // when payment complete then BookStatus = Confirmed
         });
         var email = await flightRepo.GetUserEmailAsync(userBookCode);
-        await SendBookingConfirmation(email, "Pending");
+        //await SendBookingConfirmation(email, "Pending");
+        _ = Task.Run(() => SendBookingConfirmation(email, "Pending"));
         //End transaction
         return userBookCode;
     }
+    public async Task<List<BookDto>> GetAllFlightBooksAsync(long flightId, string userBookCode, bool? isConfirmed)
+    {
+        Expression<Func<BookModel, bool>> expression = b => b.FlightId == flightId
+                && (string.IsNullOrEmpty(userBookCode) || b.UserBookCode.Contains(userBookCode))
+                && (!isConfirmed.HasValue || b.BookStatus == BookStatus.Confirmed)
+                && b.IsValid;
 
+        var books = await bookBaseRepo.GetAllAsync(expression, x => x.Include(x => x.User)
+        , x => x.Include(x => x.Seat), x => x.Include(x => x.Flight));
+
+        return books.Select(f => new BookDto
+        {
+            Id = f.Id,
+            Date = f.Date,
+            Price = f.Price,
+            BookStatus = f.BookStatus,
+            Seat = new SeatDto
+            {
+                Id = f.Seat.Id,
+                Code = f.Seat.Code,
+            },
+            Flight = new FlightDto
+            {
+                ArrivalDate = f.Flight.ArrivalDate,
+                DepartureDate = f.Flight.DepartureDate,
+            },
+            User = new UserDto
+            {
+                Id = f.User.Id,
+                Email = f.User.Email,
+            }
+        }).ToList();
+    }
     public async Task UpdateBookStatusAsync(string userBookCode, bool isConfirmed)
     {
         if (!await bookBaseRepo.CheckIfExistAsync(b => b.UserBookCode == userBookCode && b.IsValid))
@@ -74,13 +112,15 @@ public class BookService : IBookService
         if (isConfirmed)
         {
             await bookBaseRepo.UpdateAsync(b => b.UserBookCode == userBookCode && b.IsValid, setter => setter.SetProperty(x => x.BookStatus, BookStatus.Confirmed));
-            await SendBookingConfirmation(email, "Confirmed");
+            //await SendBookingConfirmation(email, "Confirmed");
+            _ = Task.Run(() => SendBookingConfirmation(email, "Pending"));
+
         }
         else
         {
             // if should return money should update payment model
             await bookBaseRepo.UpdateAsync(b => b.UserBookCode == userBookCode && b.IsValid, setter => setter.SetProperty(x => x.BookStatus, BookStatus.Canceled));
-            await SendBookingConfirmation(email, "Canceled");
+            _ = Task.Run(() => SendBookingConfirmation(email, "Canceled"));
         }
     }
     public async Task RemoveBookAsync(long bookId)
@@ -104,7 +144,7 @@ public class BookService : IBookService
         return new string(randomNumber.Select(b => chars[b % chars.Length]).ToArray());
 
     }
-    private async Task SendBookingConfirmation(string toEmail, string status)
+    public async Task SendBookingConfirmation(string toEmail, string status)
     {
         var apiKey = _configuration["SendGrid:ApiKey"];
         var client = new SendGridClient(apiKey);
@@ -118,7 +158,7 @@ public class BookService : IBookService
 
         if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
         {
-            throw new ArgumentException();
+            throw new ArgumentException("An error occur when sending email, please try later..");
         }
     }
 }

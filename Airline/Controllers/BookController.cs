@@ -20,6 +20,18 @@ public class BookController : ControllerBase
         var userBookCode = await bookService.AddBookAsync(dto);
         return Ok(userBookCode);
     }
+    [HttpGet]
+    public async Task<IActionResult> GetAllFlightBooksAsync(long flightId, string userBookCode, bool? isConfirmed)
+    {
+        var dtos = await bookService.GetAllFlightBooksAsync(flightId, userBookCode, isConfirmed);
+        return Ok(dtos);
+    }
+    [HttpGet]
+    public async Task<IActionResult> SendBookingConfirmation(string toEmail, string bookStatus)
+    {
+        await bookService.SendBookingConfirmation(toEmail, bookStatus);
+        return Ok();
+    }
     [HttpPost]
     public async Task<IActionResult> UpdateBookStatus(string userBookCode, bool isConfirmed)
     {
