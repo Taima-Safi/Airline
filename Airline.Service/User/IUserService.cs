@@ -1,8 +1,13 @@
-﻿using Airline.Dto.User;
+﻿using Airline.Database.Model;
+using Airline.Dto.Token;
+using Airline.Dto.User;
 
 namespace Airline.Service.User;
 
 public interface IUserService
 {
-    Task AddUserAsync(UserFormDto dto);
+    Task<TokenDto> CreateTokenAsync(long userId, string userType = null, string oldJwtId = null, bool? userSameToken = null, string oldRefreshToken = null);
+    Task<UserModel> GetModelByIdAsync(long id);
+    Task<UserDto> LoginAsync(LoginDto dto);
+    Task<UserDto> RegisterAsync(UserFormDto dto);
 }

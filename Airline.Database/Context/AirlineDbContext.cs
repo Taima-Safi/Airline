@@ -10,6 +10,7 @@ public class AirlineDbContext : DbContext
     {
     }
 
+    public DbSet<TokenModel> Token { get; set; }
     public DbSet<UserModel> User { get; set; }
     public DbSet<CityModel> City { get; set; }
     public DbSet<SeatModel> Seat { get; set; }

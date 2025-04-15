@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Airline.Database\Airline.Database.csproj" />
+    <ProjectReference Include="..\Airline.Dto\Airline.Dto.csproj" />
   </ItemGroup>
 
 </Project>
