@@ -23,17 +23,21 @@ public class TokenRepo : ServiceRepo, ITokenRepe
     private string Audience { get; set; }
     private string DurationInHours { get; set; }
 
-    public TokenRepo(AirlineDbContext context/*, IDbRepo dbRepo*/,
+    public TokenRepo(AirlineDbContext context, string durationInHours, string audience, string issuer, string key/*, IDbRepo dbRepo*/,
                 IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         : base(configuration, httpContextAccessor)
 
     {
         //this.dbRepo = dbRepo;
         this.context = context;
-        Key = this.configuration["JwtConfig:secret"];
-        Issuer = this.configuration["JwtConfig:validIssuer"];
-        Audience = this.configuration["JwtConfig:validAudience"];
-        DurationInHours = this.configuration["JwtConfig:durationInHours"];
+        Key = key;
+        Issuer = issuer;
+        Audience = audience;
+        DurationInHours = durationInHours;
+        //Key = this.configuration["JwtConfig:secret"];
+        //Issuer = this.configuration["JwtConfig:validIssuer"];
+        //Audience = this.configuration["JwtConfig:validAudience"];
+        //DurationInHours = this.configuration["JwtConfig:durationInHours"];
     }
     public async Task AddAsync(RefreshTokenDto tokenDto)
     {
