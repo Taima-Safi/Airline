@@ -9,5 +9,6 @@ public interface IUserService
     Task<TokenDto> CreateTokenAsync(long userId, string userType = null, string oldJwtId = null, bool? userSameToken = null, string oldRefreshToken = null);
     Task<UserModel> GetModelByIdAsync(long id);
     Task<UserDto> LoginAsync(LoginDto dto);
+    Task<TokenDto> RefreshTokenAsync(string refreshToken);
     Task<UserDto> RegisterAsync(UserFormDto dto);
 }

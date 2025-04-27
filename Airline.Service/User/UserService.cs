@@ -80,6 +80,11 @@ public class UserService : IUserService
             await ChangePasswordAsync(newHash, userId);
     }
 
+    public async Task<TokenDto> RefreshTokenAsync(string refreshToken)
+    {
+        return await tokenRepe.RefreshTokenAsync(refreshToken);
+    }
+
     public async Task ChangePasswordAsync(string newHashPassword, long id)
     => await userBaseRepo.UpdateAsync(u => u.IsValid && u.Id == id, u => u.SetProperty(u => u.HashPassword, newHashPassword));
     public async Task<UserModel> GetModelByIdAsync(long id)

@@ -23,7 +23,7 @@ public class TokenRepo : ServiceRepo, ITokenRepe
     private string Audience { get; set; }
     private string DurationInHours { get; set; }
 
-    public TokenRepo(AirlineDbContext context, string durationInHours, string audience, string issuer, string key/*, IDbRepo dbRepo*/,
+    public TokenRepo(AirlineDbContext context/*, IDbRepo dbRepo*/,
                 IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         : base(configuration, httpContextAccessor)
 
@@ -131,7 +131,7 @@ public class TokenRepo : ServiceRepo, ITokenRepe
             throw;
         }
     }
-    public async Task<RefreshTokenDto> GetAsync(string JwtId)
+    private async Task<RefreshTokenDto> GetAsync(string JwtId)
     {
         var refreshTokenDto = await context.Token
             .Where(ut => ut.JwtId == JwtId)
@@ -147,12 +147,12 @@ public class TokenRepo : ServiceRepo, ITokenRepe
         return refreshTokenDto;
     }
 
-    public async Task<(long Id, string jwtId, string refreshToken)> GetRefreshedOneAsync(string oldJwtId)
+    private async Task<(long Id, string jwtId, string refreshToken)> GetRefreshedOneAsync(string oldJwtId)
     => await context.Token
     .Where(ut => ut.IsValid && ut.OldJwtId == oldJwtId)
     .Select(ut => new Tuple<long, string, string>(ut.Id, ut.JwtId, ut.RefreshToken).ToValueTuple())
     .FirstOrDefaultAsync();
 
-    public async Task RemoveAsync(long id) => await context.Token.Where(t => t.IsValid && t.Id == id)
+    private async Task RemoveAsync(long id) => await context.Token.Where(t => t.IsValid && t.Id == id)
     .ExecuteUpdateAsync(t => t.SetProperty(t => t.IsValid, false));
 }

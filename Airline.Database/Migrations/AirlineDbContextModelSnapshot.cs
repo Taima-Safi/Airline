@@ -44,7 +44,7 @@ namespace Airline.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Airplane");
+                    b.ToTable("Airplane", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.AirportModel", b =>
@@ -74,7 +74,7 @@ namespace Airline.Database.Migrations
 
                     b.HasIndex("CityId");
 
-                    b.ToTable("Airport");
+                    b.ToTable("Airport", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.BookModel", b =>
@@ -129,7 +129,7 @@ namespace Airline.Database.Migrations
                     b.HasIndex("FlightId", "SeatId")
                         .IsUnique();
 
-                    b.ToTable("Book");
+                    b.ToTable("Book", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.CityModel", b =>
@@ -159,7 +159,7 @@ namespace Airline.Database.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("City");
+                    b.ToTable("City", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.CountryModel", b =>
@@ -184,7 +184,7 @@ namespace Airline.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Country");
+                    b.ToTable("Country", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.FlightClassPriceModel", b =>
@@ -220,7 +220,7 @@ namespace Airline.Database.Migrations
 
                     b.HasIndex("FlightId");
 
-                    b.ToTable("FlightClassPrice");
+                    b.ToTable("FlightClassPrice", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.FlightModel", b =>
@@ -266,7 +266,7 @@ namespace Airline.Database.Migrations
 
                     b.HasIndex("DepartureAirportId");
 
-                    b.ToTable("Flight");
+                    b.ToTable("Flight", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.SeatModel", b =>
@@ -299,7 +299,7 @@ namespace Airline.Database.Migrations
 
                     b.HasIndex("AirplaneId");
 
-                    b.ToTable("Seat");
+                    b.ToTable("Seat", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.TokenModel", b =>
@@ -338,7 +338,7 @@ namespace Airline.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Token");
+                    b.ToTable("Token", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.UserModel", b =>
@@ -384,7 +384,7 @@ namespace Airline.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("Airline.Database.Model.AirportModel", b =>

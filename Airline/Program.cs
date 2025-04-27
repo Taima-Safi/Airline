@@ -24,7 +24,7 @@ builder.Services.AddScoped<IFlightRepo, FlightRepo>();
 
 
 #region Database
-var connectionString = builder.Configuration.GetConnectionString(builder.Environment.IsProduction() ? "Server" : "Server");
+var connectionString = builder.Configuration.GetConnectionString(builder.Environment.IsProduction() ? "MonsterServer" : "MonsterServer");
 builder.Services.AddDbContext<AirlineDbContext>(options =>
 {
     options.UseSqlServer(connectionString);

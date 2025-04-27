@@ -40,5 +40,11 @@ namespace Airline.Controllers
 
             return Ok(userDto);
         }
+        [HttpPost, AllowAnonymous]
+        public async Task<IActionResult> RefreshToken(string RefreshToken)
+        {
+            var newToken = await userService.RefreshTokenAsync(RefreshToken);
+            return Ok(newToken);
+        }
     }
 }
